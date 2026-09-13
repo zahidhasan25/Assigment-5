@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 
 import Navbar from "./components/Navbar";
@@ -8,7 +8,30 @@ import StackPanel from "./components/StackPanel";
 import Footer from "./components/Footer";
 
 function App() {
+  const [technologies, setTechnologies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTechs, setSelectedTechs] = useState([]);
+
+  useEffect(() => {
+    fetch("/data/technologies.json")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to load technologies");
+        }
+
+        return response.json();
+      })
+      .then((data) => {
+        setTechnologies(data);
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error("Technology data load করা যায়নি!");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
 
   const handleAdd = (tech) => {
     const exists = selectedTechs.some(
@@ -56,6 +79,8 @@ function App() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <TechnologyGrid
+                technologies={technologies}
+                loading={loading}
                 selectedTechs={selectedTechs}
                 onAdd={handleAdd}
               />
